@@ -28,7 +28,7 @@ PACKAGE_ID=""
 
 if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang" ]; then
 	CC_RUNTIME_LANGUAGE=golang
-	CC_SRC_PATH="github.com/hyperledger/fabric-samples/chaincode/abstore/go/"
+	CC_SRC_PATH="github.com/hyperledger/fabric-samples/chaincode/kvstore/go/"
 elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
 	CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
 	CC_SRC_PATH="/opt/gopath/src/github.com/hyperledger/fabric-samples/chaincode/abstore/javascript/"
@@ -142,7 +142,7 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 
 	# Query chaincode on peer0.org1
 	echo "Querying chaincode on peer0.org1..."
-	chaincodeQuery 0 1 90
+	chaincodeQuery 0 1 30
 
 	## Install chaincode on peer1.org2
 	echo "Installing chaincode on peer1.org2..."
@@ -150,7 +150,7 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 
 	# Query on chaincode on peer1.org2, check if the result is 90
 	echo "Querying chaincode on peer1.org2..."
-	chaincodeQuery 1 2 90
+	chaincodeQuery 1 2 30
 
 fi
 

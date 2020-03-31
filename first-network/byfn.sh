@@ -176,14 +176,23 @@ function networkUp() {
 
   if [ "${NO_CHAINCODE}" != "true" ]; then
     echo Vendoring Go dependencies ...
-    pushd ../chaincode/abstore/go
+    pushd ../chaincode/kvstore/go
     GO111MODULE=on go mod vendor
     popd
     echo Finished vendoring Go dependencies
   fi
 
   # now run the end to end script
-  docker exec cli scripts_kv/script.sh $CHANNEL_NAME $CLI_DELAY $CC_SRC_LANGUAGE $CLI_TIMEOUT $VERBOSE $NO_CHAINCODE
+  docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $CC_SRC_LANGUAGE $CLI_TIMEOUT $VERBOSE $NO_CHAINCODE
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
+}
+
+function deploy() {
+    # now run the end to end script
+  docker exec cli scripts/deploy.sh $CHANNEL_NAME $CLI_DELAY $CC_SRC_LANGUAGE $CLI_TIMEOUT $VERBOSE $NO_CHAINCODE
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Test failed"
     exit 1
@@ -247,7 +256,7 @@ function upgradeNetwork() {
       docker-compose $COMPOSE_FILES up -d --no-deps $PEER
     done
 
-    docker exec cli scripts_kv/upgrade_to_v14.sh $CHANNEL_NAME $CLI_DELAY $CC_SRC_LANGUAGE $CLI_TIMEOUT $VERBOSE
+    docker exec cli scripts/upgrade_to_v14.sh $CHANNEL_NAME $CLI_DELAY $CC_SRC_LANGUAGE $CLI_TIMEOUT $VERBOSE
     if [ $? -ne 0 ]; then
       echo "ERROR !!!! Test failed"
       exit 1
@@ -458,6 +467,8 @@ elif [ "$MODE" == "generate" ]; then
   EXPMODE="Generating certs and genesis block"
 elif [ "$MODE" == "upgrade" ]; then
   EXPMODE="Upgrading the network"
+elif [ "$MODE" == "deploy" ]; then
+  EXPMODE="deploy chaincode"
 else
   printHelp
   exit 1
@@ -509,7 +520,7 @@ else
   echo "${EXPMODE} for channel '${CHANNEL_NAME}' with CLI timeout of '${CLI_TIMEOUT}' seconds and CLI delay of '${CLI_DELAY}' seconds"
 fi
 # ask for confirmation to proceed
-askProceed
+# askProceed
 
 #Create the network using docker compose
 if [ "${MODE}" == "up" ]; then
@@ -524,6 +535,8 @@ elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkUp
 elif [ "${MODE}" == "upgrade" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   upgradeNetwork
+elif [ "${MODE}" == "deploy" ]; then
+  deploy
 else
   printHelp
   exit 1
